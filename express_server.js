@@ -22,9 +22,11 @@ app.get("/", (req, res) => {
 
 //if end-point is /urls.json, returns json string w urls in urlDatabase
 app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-  //note that res.json does the same thing as json.stringify
+  //using template 
+  const templateUrls = { urls: urlDatabase }
+  res.render("urls_index", templateUrls);
 });
+
 
 //shows that the response is allowed to be html
 app.get("/hello", (req, res) => {
