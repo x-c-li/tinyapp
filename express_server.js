@@ -6,7 +6,6 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 
 
-
 //object with urls in it 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -20,13 +19,19 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-//if end-point is /urls.json, returns json string w urls in urlDatabase
-app.get("/urls.json", (req, res) => {
+//if end-point is /urls, returns json string w urls in urlDatabase
+app.get("/urls", (req, res) => {
   //using template 
   const templateUrls = { urls: urlDatabase }
   res.render("urls_index", templateUrls);
 });
 
+//new route to render infomation about urls 
+app.get("/urls/:shortURL", (req, res) => {
+  //Use the shortURL from the route parameter to lookup it's associated longURL from the urlDatabase
+  const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL };
+  res.render("urls_show", templateVars);
+});
 
 //shows that the response is allowed to be html
 app.get("/hello", (req, res) => {
