@@ -29,9 +29,13 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateUrls);
 });
 
+//what to do when receives POST urls
+//expects browser (client) to be giving info 
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  const tempKey = generateRandomString(); //assigning temporary key
+  urlDatabase[tempKey] = req.body.longURL; //adding key-value pair to database
+  res.redirect(`/urls/${tempKey}`); //redirecting client to shortUrl
 });
 
 app.get("/urls/new", (req, res) => {
@@ -43,6 +47,15 @@ app.get("/urls/:shortURL", (req, res) => {
   //Use the shortURL from the route parameter to lookup it's associated longURL from the urlDatabase
   const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL };
   res.render("urls_show", templateVars);
+});
+
+
+//taking short url into browser to go to redirect page w viable link 
+//no new data; just asking for data that we already have
+app.get("/u/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL; //taking shortURL from browser
+  const longURL = urlDatabase[shortURL];
+  res.redirect(301, longURL);
 });
 
 //shows that the response is allowed to be html
@@ -67,5 +80,3 @@ function generateRandomString() {
   }
   return randomString;
 }
-
-// console.log(generateRandomString())
