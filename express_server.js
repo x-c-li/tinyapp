@@ -36,7 +36,7 @@ app.get("/urls/new", (req, res) => {
 //new route to render infomation about urls
 app.get("/urls/:shortURL", (req, res) => {
   //Use the shortURL from the route parameter to lookup it's associated longURL from the urlDatabase
-  const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
 
@@ -65,9 +65,15 @@ app.post("/urls", (req, res) => {
 
 //route to remove a URL resource
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL;//takes shortURL from browser assigns to var
+  delete urlDatabase[shortURL];//deletes data based on the var 
+  res.redirect('/urls');//redirects to homepage 
+});
+
+app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
-  res.redirect('/urls');
+  urlDatabase[shortURL] = req.body.newlongURL;
+  res.redirect('/urls');//redirects to homepage 
 });
 
 //tells us when we have a connection to local server
