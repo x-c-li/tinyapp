@@ -18,8 +18,9 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+//---ROUTES------------------------------------------------------------------------
 
-//every one of the following is a "route"
+//--GET------------------------------------------------------------------------------
 
 //returns hello on "homepage" if end-point is "/"
 app.get("/", (req, res) => {
@@ -28,22 +29,30 @@ app.get("/", (req, res) => {
 
 //if end-point is /urls, returns json string w urls in urlDatabase
 app.get("/urls", (req, res) => {
-  //using template
-  const templateUrls = { urls: urlDatabase };
-  res.render("urls_index", templateUrls);
+  const templateVars = { 
+    urls: urlDatabase,
+    username: req.cookies["username"] 
+  };
+  res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    username: req.cookies["username"] 
+  };
+  res.render("urls_new", templateVars);
 });
 
 //new route to render infomation about urls
-app.get("/urls/:shortURL", (req, res) => {
+app.get("/urls/:shortURL", (req, res) => {//note :shortURL is a "general" path
   //Use the shortURL from the route parameter to lookup it's associated longURL from the urlDatabase
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { 
+    shortURL: req.params.shortURL, 
+    longURL: urlDatabase[req.params.shortURL],
+    username: req.cookies["username"] 
+  };
   res.render("urls_show", templateVars);
 });
-
 
 //taking short url into browser to go to redirect page w viable link
 //no new data; just asking for data that we already have
@@ -57,6 +66,8 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
+
+//--POST-----------------------------------------------------------------------
 
 //what to do when receives POST urls
 //expects browser (client) to be giving info
@@ -73,7 +84,6 @@ app.post("/urls/login", (req, res) => {
   res.redirect('/urls');//redirects browser back to homepage 
 });
 
-
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   urlDatabase[shortURL] = req.body.newlongURL;
@@ -87,10 +97,21 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect('/urls');//redirects to homepage 
 });
 
+//route to clear cookie
+app.post("/logout", (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');//redirects to homepage 
+});
+
+
+//---LISTEN--------------------------------------------------------------------------------------
+
 //tells us when we have a connection to local server
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+//---FUNCTIONS--------------------------------------------------------------------------------------
 
 const generateRandomString = function() {
   const alphabet = "abcdefghijklmnopqrstuvwxyz";

@@ -12,10 +12,17 @@ This is to signify that it's a partial, in this case, a header partial. -->
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
+    </div>
+    <% if(username){ %>
+      <h5>Welcome <%= username %>!</h5> 
+      <form method="POST" action="/logout">
+        <button type="submit" class="btn btn-danger">Logout</button>
+      </form>
+    <% } else{ %>  
       <form method="POST" action="/urls/login/">
         <input type="text"  name="username"/>
         <button type="submit">Username Login</button>
       </form>
-    </div>
+   <% } %>
   </nav>
 </header>
