@@ -29,15 +29,6 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateUrls);
 });
 
-//what to do when receives POST urls
-//expects browser (client) to be giving info
-app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  const tempKey = generateRandomString(); //assigning temporary key
-  urlDatabase[tempKey] = req.body.longURL; //adding key-value pair to database
-  res.redirect(`/urls/${tempKey}`); //redirecting client to shortUrl
-});
-
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
@@ -61,6 +52,22 @@ app.get("/u/:shortURL", (req, res) => {
 //shows that the response is allowed to be html
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
+});
+
+//what to do when receives POST urls
+//expects browser (client) to be giving info
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  const tempKey = generateRandomString(); //assigning temporary key
+  urlDatabase[tempKey] = req.body.longURL; //adding key-value pair to database
+  res.redirect(`/urls/${tempKey}`); //redirecting client to shortUrl
+});
+
+//route to remove a URL resource
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect('/urls');
 });
 
 //tells us when we have a connection to local server
