@@ -9,7 +9,7 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
-//object with urls in it 
+//object with urls in it
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -24,13 +24,13 @@ app.get("/", (req, res) => {
 
 //if end-point is /urls, returns json string w urls in urlDatabase
 app.get("/urls", (req, res) => {
-  //using template 
-  const templateUrls = { urls: urlDatabase }
+  //using template
+  const templateUrls = { urls: urlDatabase };
   res.render("urls_index", templateUrls);
 });
 
 //what to do when receives POST urls
-//expects browser (client) to be giving info 
+//expects browser (client) to be giving info
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   const tempKey = generateRandomString(); //assigning temporary key
@@ -42,7 +42,7 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-//new route to render infomation about urls 
+//new route to render infomation about urls
 app.get("/urls/:shortURL", (req, res) => {
   //Use the shortURL from the route parameter to lookup it's associated longURL from the urlDatabase
   const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL };
@@ -50,7 +50,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 
-//taking short url into browser to go to redirect page w viable link 
+//taking short url into browser to go to redirect page w viable link
 //no new data; just asking for data that we already have
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL; //taking shortURL from browser
@@ -68,15 +68,15 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-function generateRandomString() {
+const generateRandomString = function() {
   const alphabet = "abcdefghijklmnopqrstuvwxyz";
   let randomString = "";
   for (let i = 0; i < 7; i++) {
     if ((Math.random() * 10) <= 5) {
-      randomString += alphabet[Math.floor(Math.random() * alphabet.length)]
+      randomString += alphabet[Math.floor(Math.random() * alphabet.length)];
     } else {
-      randomString += Math.floor(Math.random() * 10)
+      randomString += Math.floor(Math.random() * 10);
     }
   }
   return randomString;
-}
+};
