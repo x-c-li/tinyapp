@@ -1,6 +1,10 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+var cookieParser = require('cookie-parser')
+
+//"installed it" in Express so it uses it
+app.use(cookieParser())
 
 //tells the Express app to use EJS as its templating engine
 app.set("view engine", "ejs");
@@ -63,16 +67,23 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${tempKey}`); //redirecting client to shortUrl
 });
 
-//route to remove a URL resource
-app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL;//takes shortURL from browser assigns to var
-  delete urlDatabase[shortURL];//deletes data based on the var 
-  res.redirect('/urls');//redirects to homepage 
+//endpoint to handle the POST to /login 
+app.post("/urls/login", (req, res) => {
+  res.cookie('username', req.body.username);
+  res.redirect('/urls');//redirects browser back to homepage 
 });
+
 
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   urlDatabase[shortURL] = req.body.newlongURL;
+  res.redirect('/urls');//redirects to homepage 
+});
+
+//route to remove a URL resource
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const shortURL = req.params.shortURL;//takes shortURL from browser assigns to var
+  delete urlDatabase[shortURL];//deletes data based on the var 
   res.redirect('/urls');//redirects to homepage 
 });
 
