@@ -42,12 +42,31 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//allows header to be used and cookies to exist from header
 app.get("/urls/new", (req, res) => {
   const templateVars = {
     username: req.cookies["username"] 
   };
   res.render("urls_new", templateVars);
 });
+
+//allows header to be used and cookies to exist from header
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"] 
+  };
+  res.render("urls_register", templateVars);
+});
+
+//to return urls_register so we can see the page
+app.get("/register", (req, res) => {
+  const templateVars = {
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.render("urls_register", templateVars);
+});
+
 
 //new route to render infomation about urls
 app.get("/urls/:shortURL", (req, res) => {//note :shortURL is a "general" path
