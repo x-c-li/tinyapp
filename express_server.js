@@ -13,11 +13,26 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+
+//--OBJECTS---------------------------------------------------------------------
 //object with urls in it
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
 //---ROUTES------------------------------------------------------------------------
 
 //---LISTEN--------------------------------------------------------------------------------------
@@ -53,20 +68,10 @@ app.get("/urls/new", (req, res) => {
 //allows header to be used and cookies to exist from header
 app.get("/register", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"] 
+    username: req.cookies["username"], 
   };
   res.render("urls_register", templateVars);
 });
-
-//to return urls_register so we can see the page
-app.get("/register", (req, res) => {
-  const templateVars = {
-    email: req.body.email,
-    password: req.body.password
-  };
-  res.render("urls_register", templateVars);
-});
-
 
 //new route to render infomation about urls
 app.get("/urls/:shortURL", (req, res) => {//note :shortURL is a "general" path
@@ -104,9 +109,22 @@ app.post("/urls", (req, res) => {
 });
 
 //endpoint to handle the POST to /login 
-app.post("/urls/login", (req, res) => {
+app.post("/login", (req, res) => {
   res.cookie('username', req.body.username);
   res.redirect('/urls');//redirects browser back to homepage 
+});
+
+app.post("/register", (req, res) => {
+  const newUserID = generateRandomString(); //generates random ID for new users 
+  const newUser = { //setting info from register into an object
+    id: newUserID,
+    email: req.body.email,
+    password: req.body.password
+  };
+  users[newUserID] = newUser; //adding to new user object to user database 
+  res.cookie('user', users[newUserID].id); //creating a cookie w new user's data
+  console.log(users); //to show myself if it works
+  res.redirect('/urls')//redirect back to homepage
 });
 
 app.post("/urls/:shortURL", (req, res) => {
