@@ -52,7 +52,7 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
-    user: users[req.cookies["user_id"]]
+    user: req.cookies.user
   };
   res.render("urls_index", templateVars);
 });
@@ -60,15 +60,24 @@ app.get("/urls", (req, res) => {
 //allows header to be used and cookies to exist from header
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    user: users[req.cookies["user_id"]]
+    user: req.cookies.user
   };
   res.render("urls_new", templateVars);
+});
+
+//reponds to login form template
+app.get("/login", (req, res) => {
+  const templateVars = {
+    user: req.cookies.user,
+    password: req.body.password  
+  };
+  res.render("urls_login", templateVars);
 });
 
 //allows header to be used and cookies to exist from header
 app.get("/register", (req, res) => {
   const templateVars = {
-    user: users[req.cookies["user_id"]]
+    user: req.cookies.user
   };
   res.render("urls_register", templateVars);
 });
@@ -79,7 +88,7 @@ app.get("/urls/:shortURL", (req, res) => {//note :shortURL is a "general" path
   const templateVars = { 
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL],
-    user: users[req.cookies["user_id"]]
+    user: req.cookies.user
   };
   res.render("urls_show", templateVars);
 });
@@ -110,7 +119,7 @@ app.post("/urls", (req, res) => {
 
 //endpoint to handle the POST to /login 
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
+  res.cookie('user', req.body.email);
   res.redirect('/urls');//redirects browser back to homepage 
 });
 
@@ -129,7 +138,7 @@ app.post("/register", (req, res) => {
     res.status(400).send("Error 400: Email already exists");
   } else {
     users[newUserID] = newUser; //adding to new user object to user database 
-    res.cookie('user_id', newUserID); //creating a cookie w new user's data
+    res.cookie('user', newUser.email); //creating a cookie w new user's data
     // console.log(users); //to show myself if the new ID is added to the object
     res.redirect('/urls')//redirect back to homepage
   }
@@ -150,7 +159,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //route to clear cookie
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id');
+  res.clearCookie('user');
   res.redirect('/urls');//redirects to homepage 
 });
 
