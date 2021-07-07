@@ -20,6 +20,12 @@ const urlDatabase = {
 };
 //---ROUTES------------------------------------------------------------------------
 
+//---LISTEN--------------------------------------------------------------------------------------
+//tells us when we have a connection to local server
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+}); 
+
 //--GET------------------------------------------------------------------------------
 
 //returns hello on "homepage" if end-point is "/"
@@ -104,13 +110,6 @@ app.post("/logout", (req, res) => {
 });
 
 
-//---LISTEN--------------------------------------------------------------------------------------
-
-//tells us when we have a connection to local server
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
-
 //---FUNCTIONS--------------------------------------------------------------------------------------
 
 const generateRandomString = function() {
@@ -124,4 +123,4 @@ const generateRandomString = function() {
     }
   }
   return randomString;
-};
+}; 
