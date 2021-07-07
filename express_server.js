@@ -39,7 +39,7 @@ const users = {
 //tells us when we have a connection to local server
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
-}); 
+});  
 
 //--GET------------------------------------------------------------------------------
 
@@ -121,14 +121,16 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: req.body.password
   };
-  users[newUserID] = newUser; //adding to new user object to user database 
-  res.cookie('user_id', users[newUserID].id); //creating a cookie w new user's data
-  console.log(users); //to show myself if the new ID is added to the object
+  const existingUser = userEmailChecker(newUser.email)
+  console.log("existing user", existingUser);
   if(!newUser.email || !newUser.password) {
     res.status(400).send("Error 400: You left the email and or password blank");
-  } else if () {
-
+  } else if (userEmailChecker(newUser.email)) {
+    res.status(400).send("Error 400: Email already exists");
   } else {
+    users[newUserID] = newUser; //adding to new user object to user database 
+    res.cookie('user_id', newUserID); //creating a cookie w new user's data
+    // console.log(users); //to show myself if the new ID is added to the object
     res.redirect('/urls')//redirect back to homepage
   }
 });
@@ -148,7 +150,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //route to clear cookie
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');//redirects to homepage 
 });
 
@@ -169,10 +171,12 @@ const generateRandomString = function() {
 }; 
 
 const userEmailChecker = function(email) {//check if user email is in user object already
-  for (const u of users) {//users is the data object
-    if (email === u.email) {
-      return true;
+  for (const u in users) {//users is the data object
+    const user = users[u];
+    if (user.email === email) {
+      console.log(`${email}-----------`, user)   
+      return user;
     }
   }
-  return false;
+  return false; 
 };
