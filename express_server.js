@@ -52,7 +52,7 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
-    username: req.cookies["username"] 
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_index", templateVars);
 });
@@ -60,7 +60,7 @@ app.get("/urls", (req, res) => {
 //allows header to be used and cookies to exist from header
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"] 
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_new", templateVars);
 });
@@ -68,7 +68,7 @@ app.get("/urls/new", (req, res) => {
 //allows header to be used and cookies to exist from header
 app.get("/register", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"], 
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_register", templateVars);
 });
@@ -79,7 +79,7 @@ app.get("/urls/:shortURL", (req, res) => {//note :shortURL is a "general" path
   const templateVars = { 
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["username"] 
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_show", templateVars);
 });
@@ -122,9 +122,15 @@ app.post("/register", (req, res) => {
     password: req.body.password
   };
   users[newUserID] = newUser; //adding to new user object to user database 
-  res.cookie('user', users[newUserID].id); //creating a cookie w new user's data
-  console.log(users); //to show myself if it works
-  res.redirect('/urls')//redirect back to homepage
+  res.cookie('user_id', users[newUserID].id); //creating a cookie w new user's data
+  console.log(users); //to show myself if the new ID is added to the object
+  if(!newUser.email || !newUser.password) {
+    res.status(400).send("Error 400: You left the email and or password blank");
+  } else if () {
+
+  } else {
+    res.redirect('/urls')//redirect back to homepage
+  }
 });
 
 app.post("/urls/:shortURL", (req, res) => {
@@ -161,3 +167,12 @@ const generateRandomString = function() {
   }
   return randomString;
 }; 
+
+const userEmailChecker = function(email) {//check if user email is in user object already
+  for (const u of users) {//users is the data object
+    if (email === u.email) {
+      return true;
+    }
+  }
+  return false;
+};
