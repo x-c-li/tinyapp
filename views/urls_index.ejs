@@ -30,10 +30,10 @@
           <tr>
             <td><%= url %></td>
             <td><%= urls[url].longURL %></td>
-            <td>
+            <!-- <td>
               <button class="btn btn-outline-success">Edit</button>
-            </td>
-            <!-- <td><form method="GET" action="/urls/<%= url%>/"><button type="submit" class="btn btn-outline-success">Edit</button></form></td> -->
+            </td> -->
+            <td><form method="GET" action="/urls/<%= url%>/"><button type="submit" class="btn btn-outline-success">Edit</button></form></td>
             <td>
               <form method="POST" action="/urls/<%= url%>/delete">
                 <button type="submit" class="btn btn-outline-danger">Delete</button>

@@ -11,6 +11,7 @@
     <%- include('partials/_header'); %>
   </header>
   <div class="card text-center">
+    <% if (user) {%>
       <div class="card-header"></div>
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
@@ -25,6 +26,9 @@
         <button type="submit" class="btn btn-outline-danger">Update</button>
       </form>
     </div>
+    <%} else {%>
+      <h1>ERROR! You're not logged in! OR, the ID doesn't belong to you!</h1>
+    <%} %>
   </div>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
