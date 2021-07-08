@@ -58,9 +58,10 @@ instead of doing an if statement for every single get request
 */
 app.use('/', (req, res, next) => {//app.use works for EVERYTHING (get, post)
   const user = req.cookies.user_id; 
-  const whiteList = ['/urls', '/login']
+  const whiteList = ['/urls', '/login'];
   console.log(req.path);
-  if (user || whiteList.includes(req.path)) {//check if we have user object
+  console.log(typeof req.path);
+  if (user || whiteList.includes(req.path) || req.path.startsWith('/u/')) {//check if we have user object
     next(); //goes to next http request
   } else {
     res.redirect('/urls'); //if not, redirect to login
@@ -116,8 +117,12 @@ app.get("/urls/:shortURL", (req, res) => {//note :shortURL is a "general" path
 //no new data; just asking for data that we already have
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL; //taking shortURL from browser
-  const longURL = urlDatabase[shortURL].longURL;
-  res.redirect(301, longURL);
+  const longURL = urlDatabase[shortURL];
+  if(longURL) {
+    res.redirect(301, longURL.longURL);
+  } else {
+    res.render("Error 403: The short URL doesn't exist")
+  }
 });
 
 //shows that the response is allowed to be html
