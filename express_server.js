@@ -48,6 +48,20 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+/*
+using middleware to check if the user is logged in 
+instead of doing an if statement for every single get request
+*/
+app.use('/', (req, res, next) => {//app.use works for EVERYTHING (get, post)
+  const user = req.cookies.user_id; 
+  const whiteList = ['/urls', '/login']
+  console.log(req.path);
+  if (user || whiteList.includes(req.path)) {//check if we have user object
+    next(); //goes to next http request
+  }
+  res.redirect('/urls'); //if not, redirect to login
+})
+
 //if end-point is /urls, returns json string w urls in urlDatabase
 app.get("/urls", (req, res) => {
   const templateVars = { 
@@ -106,7 +120,7 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-//--POST-----------------------------------------------------------------------
+//--POST--(never to render here stuff)---------------------------------------------------------------------
 
 //what to do when receives POST urls
 //expects browser (client) to be giving info
@@ -117,11 +131,16 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${tempKey}`); //redirecting client to shortUrl
 });
 
-//endpoint to handle the POST to /login 
+// app.post("urls/new", (req, res) => {
+//   if ()
+// });
+
+//handling data we get from login page --checking if matches w data or not
 app.post("/login", (req, res) => {
-  if (userEmailChecker(req.body.email)) {
-    if (passwordChecker(req.body.password)) {
-      res.cookie('user_id', getUserID(req.body.email, req.body.password));
+  if (userEmailChecker(req.body.email)) { //checking input email w database emails
+    if (passwordChecker(req.body.password)) { //checking input pswd w database pswds
+      //if matches, get matching ID and make a cookie called user_id
+      res.cookie('user_id', getUserID(req.body.email, req.body.password)); 
       res.redirect('/urls');//redirects browser back to homepage 
     } else {
       res.status(403).send("Email was correct but password was not");
