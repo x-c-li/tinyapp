@@ -25,12 +25,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    password: "1234"
   },
  "user2RandomID": {
     id: "user2RandomID", 
     email: "user2@example.com", 
-    password: "dishwasher-funk"
+    password: "12345"
   }
 }
 //---ROUTES------------------------------------------------------------------------
@@ -52,7 +52,7 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
-    user: req.cookies.user
+    user: users[req.cookies.user_id] && users[req.cookies.user_id].email //check if ID exists then if it does it'll try to get the email
   };
   res.render("urls_index", templateVars);
 });
@@ -60,7 +60,7 @@ app.get("/urls", (req, res) => {
 //allows header to be used and cookies to exist from header
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    user: req.cookies.user
+    user: users[req.cookies.user_id] && users[req.cookies.user_id].email //check if ID exists then if it does it'll try to get the email
   };
   res.render("urls_new", templateVars);
 });
@@ -68,7 +68,7 @@ app.get("/urls/new", (req, res) => {
 //reponds to login form template
 app.get("/login", (req, res) => {
   const templateVars = {
-    user: req.cookies.user,
+    user: req.cookies.user_id,
     password: req.body.password  
   };
   res.render("urls_login", templateVars);
@@ -77,7 +77,7 @@ app.get("/login", (req, res) => {
 //allows header to be used and cookies to exist from header
 app.get("/register", (req, res) => {
   const templateVars = {
-    user: req.cookies.user
+    user: req.cookies.user_id
   };
   res.render("urls_register", templateVars);
 });
@@ -88,7 +88,7 @@ app.get("/urls/:shortURL", (req, res) => {//note :shortURL is a "general" path
   const templateVars = { 
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL],
-    user: req.cookies.user
+    user: users[req.cookies.user_id] && users[req.cookies.user_id].email //check if ID exists then if it does it'll try to get the email
   };
   res.render("urls_show", templateVars);
 });
@@ -119,8 +119,16 @@ app.post("/urls", (req, res) => {
 
 //endpoint to handle the POST to /login 
 app.post("/login", (req, res) => {
-  res.cookie('user', req.body.email);
-  res.redirect('/urls');//redirects browser back to homepage 
+  if (userEmailChecker(req.body.email)) {
+    if (passwordChecker(req.body.password)) {
+      res.cookie('user_id', getUserID(req.body.email, req.body.password));
+      res.redirect('/urls');//redirects browser back to homepage 
+    } else {
+      res.status(403).send("Email was correct but password was not");
+    }
+  } else {
+    res.status(403).send("Email was not correct");
+  }
 });
 
 app.post("/register", (req, res) => {
@@ -131,14 +139,14 @@ app.post("/register", (req, res) => {
     password: req.body.password
   };
   const existingUser = userEmailChecker(newUser.email)
-  console.log("existing user", existingUser);
+  // console.log("existing user", existingUser);
   if(!newUser.email || !newUser.password) {
     res.status(400).send("Error 400: You left the email and or password blank");
-  } else if (userEmailChecker(newUser.email)) {
+  } else if (existingUser) {
     res.status(400).send("Error 400: Email already exists");
   } else {
     users[newUserID] = newUser; //adding to new user object to user database 
-    res.cookie('user', newUser.email); //creating a cookie w new user's data
+    res.cookie('user_id', newUser.id); //creating a cookie w new user's data
     // console.log(users); //to show myself if the new ID is added to the object
     res.redirect('/urls')//redirect back to homepage
   }
@@ -159,7 +167,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //route to clear cookie
 app.post("/logout", (req, res) => {
-  res.clearCookie('user');
+  res.clearCookie('user_id');
   res.redirect('/urls');//redirects to homepage 
 });
 
@@ -188,4 +196,23 @@ const userEmailChecker = function(email) {//check if user email is in user objec
     }
   }
   return false; 
+};
+
+const passwordChecker = function(password) {//checks password against data
+  for (const u in users) {
+    if (users[u].password === password) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const getUserID = function(email, password) {//to return checked ID for password & email
+  let existingUserID = "";
+  for (const u in users) {
+    if(users[u].email === email && users[u].password === password) {
+      existingUserID = users[u].id;
+    }
+  }
+  return existingUserID;
 };
