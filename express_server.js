@@ -19,10 +19,12 @@ app.use(bodyParser.urlencoded({extended: true}));
 const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
-    userID: "userRandomID"},
+    userID: "userRandomID"
+  },
   "9sm5xK": {
     longURL: "http://www.google.com", 
-    userID: "user2RandomID"}
+    userID: "user2RandomID"
+  }
 };
 
 const users = { 
@@ -58,15 +60,17 @@ instead of doing an if statement for every single get request
 */
 app.use('/', (req, res, next) => {//app.use works for EVERYTHING (get, post)
   const user = req.cookies.user_id; 
-  const whiteList = ['/urls', '/login'];
-  console.log(req.path);
-  console.log(typeof req.path);
+  const whiteList = ['/urls', '/login', '/register'];//['/login', '/register'] gives me the error 
+  // console.log(req.path);
+  // console.log(typeof req.path);
   if (user || whiteList.includes(req.path) || req.path.startsWith('/u/')) {//check if we have user object
+    console.log("in the if condition");
     next(); //goes to next http request
   } else {
-    res.redirect('/urls'); //if not, redirect to login
+    console.log("in the else condition -- meaning not logged in")
+    res.redirect('/urls'); //if not, redirect to prompt (redirect to prompt gives me the error)
   }
-})
+});
 
 //if end-point is /urls, returns json string w urls in urlDatabase
 app.get("/urls", (req, res) => {
@@ -243,3 +247,12 @@ const getUserID = function(email, password) {//to return checked ID for password
   }
   return existingUserID;
 };
+
+const compareIDwithDatabaseID = function(inputID) {
+  for (const u in urlDatabase) {
+    if (urlDatabase[u].userID === inputID) {
+      return true;
+    }
+  }
+  return false;
+}
