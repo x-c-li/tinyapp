@@ -19,11 +19,9 @@ This is to signify that it's a partial, in this case, a header partial. -->
         <button type="submit" class="btn btn-danger">Logout</button>
       </form>
     <% } else { %>
-      <form method="GET" action="/login">
-        <button type="submit">Login</button>
-      </form>
       <div class="navbar-nav">
-        <a class="nav-item nav-link" href="/register">Register</a>
+        <a class="nav-item nav-link" href="/login">Login</a>
+        <a class="nav-item nav-link" href="/register">Register</a> 
       </div>
    <% } %>
   </nav>
