@@ -17,8 +17,12 @@ app.use(bodyParser.urlencoded({extended: true}));
 //--OBJECTS---------------------------------------------------------------------
 //object with urls in it
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "userRandomID"},
+  "9sm5xK": {
+    longURL: "http://www.google.com", 
+    userID: "user2RandomID"}
 };
 
 const users = { 
@@ -58,8 +62,9 @@ app.use('/', (req, res, next) => {//app.use works for EVERYTHING (get, post)
   console.log(req.path);
   if (user || whiteList.includes(req.path)) {//check if we have user object
     next(); //goes to next http request
+  } else {
+    res.redirect('/urls'); //if not, redirect to login
   }
-  res.redirect('/urls'); //if not, redirect to login
 })
 
 //if end-point is /urls, returns json string w urls in urlDatabase
@@ -101,7 +106,7 @@ app.get("/urls/:shortURL", (req, res) => {//note :shortURL is a "general" path
   //Use the shortURL from the route parameter to lookup it's associated longURL from the urlDatabase
   const templateVars = { 
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL,
     user: users[req.cookies.user_id] && users[req.cookies.user_id].email //check if ID exists then if it does it'll try to get the email
   };
   res.render("urls_show", templateVars);
@@ -111,7 +116,7 @@ app.get("/urls/:shortURL", (req, res) => {//note :shortURL is a "general" path
 //no new data; just asking for data that we already have
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL; //taking shortURL from browser
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
   res.redirect(301, longURL);
 });
 
@@ -127,13 +132,11 @@ app.get("/hello", (req, res) => {
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   const tempKey = generateRandomString(); //assigning temporary key
-  urlDatabase[tempKey] = req.body.longURL; //adding key-value pair to database
+  urlDatabase[tempKey] = { // adding OBJECT to database
+    longURL: req.body.longURL, 
+    userID: req.cookies.user_id}; 
   res.redirect(`/urls/${tempKey}`); //redirecting client to shortUrl
 });
-
-// app.post("urls/new", (req, res) => {
-//   if ()
-// });
 
 //handling data we get from login page --checking if matches w data or not
 app.post("/login", (req, res) => {
