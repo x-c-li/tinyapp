@@ -26,7 +26,7 @@ const userEmailChecker = function(email, database) {
 };
 
 //returns user object
-const urlsforUser = function(inputID, database) {
+const urlsForUser = function(inputID, database) {
   let match = {};
   for (const u in database) {
     if (database[u].userID === inputID.id) {
@@ -40,5 +40,5 @@ const urlsforUser = function(inputID, database) {
 module.exports = {
   generateRandomString,
   userEmailChecker,
-  urlsforUser
+  urlsForUser
 };
