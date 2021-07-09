@@ -90,7 +90,7 @@ app.use('/', (req, res, next) => {//app.use works for EVERYTHING (get, post)
 //if end-point is /urls, returns json string w urls in urlDatabase
 app.get("/urls", (req, res) => {
   if (users[req.session.user_id]) { //check if cookie user.ID exists in user database (should)
-    let loggedIn = urlsforUser(users[req.session.user_id]); //loggedIn = checked object that exists
+    let loggedIn = urlsforUser(users[req.session.user_id], urlDatabase); //loggedIn = checked object that exists
     // console.log(loggedIn);
     const templateVars = {
       urls: loggedIn,
@@ -134,10 +134,10 @@ app.get("/register", (req, res) => {
 //new route to render infomation about urls
 app.get("/urls/:shortURL", (req, res) => {//note :shortURL is a "general" path
   //Use the shortURL from the route parameter to lookup it's associated longURL from the urlDatabase
-  const templateVars = {
+  const templateVars = { 
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
-    user: urlsforUser(users[req.session.user_id]) && users[req.session.user_id].email //check if ID exists then if it does it'll try to get the email
+    user: urlsforUser(users[req.session.user_id], urlDatabase) && users[req.session.user_id].email //check if ID exists then if it does it'll try to get the email
   };
   res.render("urls_show", templateVars);
 });
@@ -175,11 +175,12 @@ app.post("/urls", (req, res) => {
 //handling data we get from login page --checking if matches w data or not
 app.post("/login", (req, res) => {
   const {password, email} = req.body;
-  if (userEmailChecker(email)) { //checking input email w database emails
-    if (bcrypt.compareSync(password, userEmailChecker(email).password)) { //checking input pswd w database pswds
-      console.log(userEmailChecker(email).id);
+  const checkedUser = userEmailChecker(email, users);
+  if (checkedUser) { //checking input email w database emails
+    if (bcrypt.compareSync(password, checkedUser.password)) { //checking input pswd w database pswds
+      console.log(checkedUser.id);
       //if matches, get matching ID and make a cookie called user_id
-      res.session.user_id = userEmailChecker(email).id;
+      req.session.user_id = checkedUser.id;
       res.redirect('/urls');//redirects browser back to homepage
     } else {
       res.status(403).send("Email was correct but password was not");
@@ -191,7 +192,7 @@ app.post("/login", (req, res) => {
 
 app.post("/register", (req, res) => {
   const newUserID = generateRandomString(); //generates random ID for new users
-  const existingUser = userEmailChecker(req.body.email);
+  const existingUser = userEmailChecker(req.body.email, users);
   if (!req.body.email || !req.body.password) {
     res.status(400).send("Error 400: You left the email and or password blank");
   } else if (existingUser) {
@@ -203,7 +204,7 @@ app.post("/register", (req, res) => {
       password: req.body.password
     };
     console.log(users);
-    res.session.user_id = newUserID; //creating a cookie w new user's data
+    req.session.user_id = newUserID; //creating a cookie w new user's data
     res.redirect('/urls');//redirect back to homepage
   }
 });
@@ -223,7 +224,7 @@ app.post("/urls/:shortURL", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;//takes shortURL from browser assigns to var
   if (urlDatabase[shortURL]) { //compare shortURL to shortURL in database
-    if (urlsforUser(users[req.session.user_id])) { //see if user ID from cookie matches one matching shortURL in users database
+    if (urlsforUser(users[req.session.user_id], urlDatabase)) { //see if user ID from cookie matches one matching shortURL in users database
       delete urlDatabase[shortURL];//deletes data based on the var
       res.redirect('/urls');//redirects to homepage
     } else {
@@ -237,7 +238,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 //route to clear cookie
 app.post("/logout", (req, res) => {
   // console.log("hitting logout");
-  res.clearCookie('user_id');
+  // res.clearCookie('user_id');
+  req.session.user_id = null;  // NOT SURE THAT THIS IS ACTUALLY GETTING RID OF COOKIES
   res.redirect('/urls');//redirects to homepage
 });
 
@@ -257,9 +259,9 @@ const generateRandomString = function() {
   return randomString;
 };
 
-const userEmailChecker = function(email) {//check if user email is in user object already
-  for (const u in users) {//users is the data object
-    const user = users[u];
+const userEmailChecker = function(email, database) {//check if user email is in user object already
+  for (const u in database) {//users is the data object
+    const user = database[u];
     if (user.email === email) {
       // console.log(`${email}-----------`, user);
       return user;
@@ -269,15 +271,15 @@ const userEmailChecker = function(email) {//check if user email is in user objec
 };
 
 
-const urlsforUser = function(inputID) {
+const urlsforUser = function(inputID, database) {
   let match = {};
-  for (const u in urlDatabase) {
+  for (const u in database) {
     // console.log("inputID.id", inputID.id)
     // console.log("userID from database", urlDatabase[u].userID)
-    if (urlDatabase[u].userID === inputID.id) {
+    if (database[u].userID === inputID.id) {
       // console.log("urldatabase[u]", urlDatabase[u])
       // console.log("urldatabase", urlDatabase)
-      match[u] = urlDatabase[u];
+      match[u] = database[u];
       return match;
     }
   }
