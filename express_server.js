@@ -2,9 +2,9 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 let cookieParser = require('cookie-parser');
-let cookieSession = require('cookie-session')
+let cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
-const { generateRandomString, userEmailChecker, urlsForUser } = require('./helper')
+const { generateRandomString, userEmailChecker, urlsForUser } = require('./helper');
 
 //for bcrypt
 const salt = bcrypt.genSaltSync(10);
@@ -27,7 +27,8 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
 
-//--OBJECTS---------------------------------------------------------------------
+//--DATA OBJECTS---------------------------------------------------------------------
+
 //object with urls in it
 const urlDatabase = {
   "b2xVn2": {
@@ -62,39 +63,36 @@ app.listen(PORT, () => {
 
 //--GET------------------------------------------------------------------------------
 
-//returns hello on "homepage" if end-point is "/"
-app.get("/", (req, res) => { 
+//returns hello on page if end-point is "/"
+app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-/* 
+/*
 using middleware to check if the user is logged in
 instead of doing an if statement for every single get request
 */
 app.use('/', (req, res, next) => {//app.use works for EVERYTHING (get, post)
-  const userID = req.session.user_id; 
+  const userID = req.session.user_id;
   const whiteList = ['/urls', '/login', '/register', '/logout'];
-  // console.log(req.path);
-  // console.log(typeof req.path);
   if (users[userID]) { //check if we have userID (from cookie from registering) in our user database
-    // console.log("the user does exist")
     next(); //goes to next http request
   } else if (whiteList.includes(req.path) || req.path.startsWith('/u/')) {
-    // console.log("the path is in the whitelist OR the path includes /u/")
-    next(); 
+    next();
   } else {
-    // console.log("user didn't exist, whitelist didn't include, path didn't have /u/")
-    res.redirect('/urls'); //if not, redirect to prompt 
+    res.redirect('/urls'); //if not, redirect to homepage
   }
 });
 
 //if end-point is /urls, returns json string w urls in urlDatabase
 app.get("/urls", (req, res) => {
   if (users[req.session.user_id]) { //check if cookie user.ID exists in user database (should)
-    let loggedIn = urlsForUser(users[req.session.user_id], urlDatabase); //loggedIn = checked object that exists
+    //loggedIn = checked object that exists
+    let loggedIn = urlsForUser(users[req.session.user_id], urlDatabase);
     const templateVars = {
       urls: loggedIn,
-      user: users[req.session.user_id] && users[req.session.user_id].email //check if ID exists then if it does it'll try to get the email    
+      //below checks if ID exists then if it does it'll try to get the email
+      user: users[req.session.user_id] && users[req.session.user_id].email
     };
     res.render("urls_index", templateVars);
   } else {
@@ -103,16 +101,16 @@ app.get("/urls", (req, res) => {
       user: null,
     };
     res.render("urls_error", templateVars);
-    // res.redirect("/login");
   }
 });
 
 //allows header to be used and cookies to exist from header
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    user: users[req.session.user_id] && users[req.session.user_id].email //check if ID exists then if it does it'll try to get the email
+    //below checks if ID exists then if it does it'll try to get the email
+    user: users[req.session.user_id] && users[req.session.user_id].email
   };
-  res.render("urls_new", templateVars); 
+  res.render("urls_new", templateVars);
 });
 
 //reponds to login form template
@@ -135,10 +133,11 @@ app.get("/register", (req, res) => {
 //new route to render infomation about urls
 app.get("/urls/:shortURL", (req, res) => {//note :shortURL is a "general" path
   //Use the shortURL from the route parameter to lookup it's associated longURL from the urlDatabase
-  const templateVars = { 
+  const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
-    user: urlsForUser(users[req.session.user_id], urlDatabase) && users[req.session.user_id].email //check if ID exists then if it does it'll try to get the email
+    //checks if ID exists then if it does it'll try to get the email
+    user: urlsForUser(users[req.session.user_id], urlDatabase) && users[req.session.user_id].email
   };
   res.render("urls_show", templateVars);
 });
@@ -165,7 +164,6 @@ app.get("/hello", (req, res) => {
 //what to do when receives POST urls
 //expects browser (client) to be giving info
 app.post("/urls", (req, res) => {
-  // console.log(req.body);  // Log the POST request body to the console
   if (users[req.session.user_id]) {
     const tempKey = generateRandomString(); //assigning temporary key
     urlDatabase[tempKey] = { // adding OBJECT to database
@@ -183,7 +181,6 @@ app.post("/login", (req, res) => {
   const checkedUser = userEmailChecker(email, users);
   if (checkedUser) { //checking input email w database emails
     if (bcrypt.compareSync(password, checkedUser.password)) { //checking input pswd w database pswds
-      console.log(checkedUser.id);
       //if matches, get matching ID and make a cookie called user_id
       req.session.user_id = checkedUser.id;
       res.redirect('/urls');//redirects browser back to homepage
@@ -208,7 +205,6 @@ app.post("/register", (req, res) => {
       email: req.body.email,
       password: req.body.password
     };
-    console.log(users);
     req.session.user_id = newUserID; //creating a cookie w new user's data
     res.redirect('/urls');//redirect back to homepage
   }
@@ -216,9 +212,9 @@ app.post("/register", (req, res) => {
 
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL; //saves url from page
-  const url = urlDatabase[shortURL]; //database object 
-  if (url.userID === req.session.user_id) { //checks if ID is in database 
-    url.longURL = req.body.newlongURL; //THE EDITING MAGIC
+  const url = urlDatabase[shortURL]; //database object
+  if (url.userID === req.session.user_id) { //checks if ID is in database
+    url.longURL = req.body.newlongURL; //editing the longURL w newlongURL input from ejs file
     res.redirect('/urls');//redirects to homepage
   } else {
     res.send("ERROR: The user ID doesn't match... sus..");
@@ -229,7 +225,8 @@ app.post("/urls/:shortURL", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;//takes shortURL from browser assigns to var
   if (urlDatabase[shortURL]) { //compare shortURL to shortURL in database
-    if (urlsForUser(users[req.session.user_id], urlDatabase)) { //see if user ID from cookie matches one matching shortURL in users database
+    //see if user ID from cookie matches one matching shortURL in users database
+    if (urlsForUser(users[req.session.user_id], urlDatabase)) {
       delete urlDatabase[shortURL];//deletes data based on the var
       res.redirect('/urls');//redirects to homepage
     } else {
@@ -242,6 +239,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //route to clear cookie
 app.post("/logout", (req, res) => {
-  req.session.user_id = null; 
+  req.session.user_id = null; //clears user_id cookie
   res.redirect('/urls');//redirects to homepage
 });
