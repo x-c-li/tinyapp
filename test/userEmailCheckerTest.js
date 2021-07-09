@@ -1,37 +1,69 @@
 const assert = require('chai').assert;
-const urlsForUser = require('../helper');
+const { userEmailChecker } = require('../helper'); 
 
-describe("#urlsForUser", () => {
+describe("#userEmailChecker", () => {
   it("should return object within database", () => {
-    const person = {id: "12345", fave: "sleeping"}
+    const email = "email@email.ca"
     const database = {
-      potato: {userID: "12345"},
-      chicken: {userID: "67891"}
+      p1: {
+        name: "bob",
+        email: "email@gmail.ca"
+      },
+      p2: {
+        name: "notbob",
+        email: "email@email.ca"
+      }
+    };
+    let answer = {
+        name: "notbob",
+        email: "email@email.ca"
     }
-    assert.strictEqual(urlsForUser(person, database), {id: "12345", fave: "sleeping"});
+    assert.deepEqual(userEmailChecker(email, database), answer);
   });
 
-  it("does it return a match?", () => {
-    const person = {id: "12345", fave: "sleeping"}
+  it("if the emails don't match then it should return false", () => {
+    const email = "xmail@email.ca"
     const database = {
-      potato: {userID: "12345"},
-      chicken: {userID: "67891"}
-    }
-    assert.strictEqual(urlsForUser(person, database), {potato: {userID: "12345"}});
+      p1: {
+        name: "bob",
+        email: "email@gmail.ca"
+      },
+      p2: {
+        name: "notbob",
+        userID: "email@email.ca"
+      }
+    };
+    assert.strictEqual(userEmailChecker(email, database), false);
   });
 
+  it("if there is no email it should return false", () => {
+    const email = ""
+    const database = {
+      p1: {
+        name: "bob",
+        email: "email@gmail.ca"
+      },
+      p2: {
+        name: "notbob",
+        userID: "email@email.ca"
+      }
+    };
+    assert.strictEqual(userEmailChecker(email, database), false);
+  });
 
-  // const urlsForUser = function(inputID, database) {
-  //   let match = {};
-  //   for (const u in database) {
-  //     if (database[u].userID === inputID.id) {
-  //       match[u] = database[u];
-  //       return match;
-  //     }
-  //   }
-  //   return false;
-  // };
-
-
+  it("if the database has no emails then it should false", () => {
+    const email = "email@gmail.ca"
+    const database = {
+      p1: {
+        name: "bob",
+        xmail: "email@gmail.ca"
+      },
+      p2: {
+        name: "notbob",
+        userID: "email@email.ca"
+      }
+    };
+    assert.strictEqual(userEmailChecker(email, database), false);
+  });
 
 });
