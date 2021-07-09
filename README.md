@@ -4,12 +4,15 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["This is what you should see after you are logged in"](file:///home/xiaowei/Pictures/urls-after-logged-in.png
-)
 
-!["The login page"](file:///home/xiaowei/Pictureslogin-page.png)
+##### Login Page
+![](file:///home/xiaowei/Pictures/login-page.png)
 
-!["Creating a tiny URL page"](file:///home/xiaowei/Picturescreate-new-url.png)
+##### Homepage (/urls) After Logging In
+![](file:///home/xiaowei/Pictures/urls-after-logged-in.png)
+
+##### Creating A Tiny URL
+![](file:///home/xiaowei/Pictures/create-new-url.png)
 
 ## Dependencies
 
