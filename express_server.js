@@ -92,7 +92,6 @@ app.use('/', (req, res, next) => {//app.use works for EVERYTHING (get, post)
 app.get("/urls", (req, res) => {
   if (users[req.session.user_id]) { //check if cookie user.ID exists in user database (should)
     let loggedIn = urlsForUser(users[req.session.user_id], urlDatabase); //loggedIn = checked object that exists
-    // console.log(loggedIn);
     const templateVars = {
       urls: loggedIn,
       user: users[req.session.user_id] && users[req.session.user_id].email //check if ID exists then if it does it'll try to get the email    
@@ -100,10 +99,11 @@ app.get("/urls", (req, res) => {
     res.render("urls_index", templateVars);
   } else {
     const templateVars = {
-      errorMessage: "Error! This means you've logged out and now won't be able to see the content. Log back in or register for the urls",
+      errorMessage: "ERROR! Please login or register to view content or use app.",
       user: null,
     };
-    res.render("urls_error", templateVars);  
+    res.render("urls_error", templateVars);
+    // res.redirect("/login");
   }
 });
 
@@ -165,12 +165,16 @@ app.get("/hello", (req, res) => {
 //what to do when receives POST urls
 //expects browser (client) to be giving info
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  const tempKey = generateRandomString(); //assigning temporary key
-  urlDatabase[tempKey] = { // adding OBJECT to database
-    longURL: req.body.longURL,
-    userID: req.session.user_id};
-  res.redirect(`/urls/${tempKey}`); //redirecting client to shortUrl
+  // console.log(req.body);  // Log the POST request body to the console
+  if (users[req.session.user_id]) {
+    const tempKey = generateRandomString(); //assigning temporary key
+    urlDatabase[tempKey] = { // adding OBJECT to database
+      longURL: req.body.longURL,
+      userID: req.session.user_id};
+    res.redirect(`/urls/${tempKey}`); //redirecting client to shortUrl
+  } else {
+    res.status(401).send("Error 401: User not found");
+  }
 });
 
 //handling data we get from login page --checking if matches w data or not
@@ -184,10 +188,10 @@ app.post("/login", (req, res) => {
       req.session.user_id = checkedUser.id;
       res.redirect('/urls');//redirects browser back to homepage
     } else {
-      res.status(403).send("Email was correct but password was not");
+      res.status(403).send("Error 403: Email was correct but password was not");
     }
   } else {
-    res.status(403).send("Email was not correct");
+    res.status(401).send("Error 401: Email was not correct");
   }
 });
 
@@ -238,8 +242,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //route to clear cookie
 app.post("/logout", (req, res) => {
-  // console.log("hitting logout");
-  // res.clearCookie('user_id');
-  req.session.user_id = null;  // NOT SURE THAT THIS IS ACTUALLY GETTING RID OF COOKIES
+  req.session.user_id = null; 
   res.redirect('/urls');//redirects to homepage
 });
