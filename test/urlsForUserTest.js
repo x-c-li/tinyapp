@@ -1,5 +1,6 @@
 const assert = require('chai').assert;
-const urlsForUser = require('../helper');
+const { urlsForUser } = require('../helper'); 
+//object destructing
 
 describe("#urlsForUser", () => {
   it("should return object within database", () => {
@@ -7,31 +8,18 @@ describe("#urlsForUser", () => {
     const database = {
       potato: {userID: "12345"},
       chicken: {userID: "67891"}
-    }
-    assert.strictEqual(urlsForUser(person, database), {id: "12345", fave: "sleeping"});
+    };
+    const answer = {potato: {userID: "12345"}};
+    assert.deepEqual(urlsForUser(person, database), answer);
   });
 
-  it("does it return a match?", () => {
-    const person = {id: "12345", fave: "sleeping"}
+  it("if the ID's don't match then it should return false", () => {
+    const person = {id: "7975456", fave: "sleeping"}
     const database = {
       potato: {userID: "12345"},
       chicken: {userID: "67891"}
     }
-    assert.strictEqual(urlsForUser(person, database), {potato: {userID: "12345"}});
+    assert.strictEqual(urlsForUser(person, database), false);
   });
-
-
-  // const urlsForUser = function(inputID, database) {
-  //   let match = {};
-  //   for (const u in database) {
-  //     if (database[u].userID === inputID.id) {
-  //       match[u] = database[u];
-  //       return match;
-  //     }
-  //   }
-  //   return false;
-  // };
-
-
 
 });
