@@ -2,6 +2,12 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 let cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
+
+//for bcrypt
+const salt = bcrypt.genSaltSync(10); 
+//use bcrypt to hash via: bcrypt.hashSync(password, salt)
+//bcrypt.compareSync(password you want to check, password you're checking against (in data))
 
 //"installed it" in Express so it uses it
 app.use(cookieParser());
@@ -31,12 +37,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "1234"
+    password: bcrypt.hashSync("1234", salt)
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "12345"
+    password: bcrypt.hashSync("12345", salt)
   }
 };
 //---ROUTES------------------------------------------------------------------------
