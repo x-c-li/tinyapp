@@ -1,7 +1,7 @@
 //---HELPER FUNCTIONS--------------------------------------------------------------------------------------
 
-//generating a random string to use as our ID 
-//not going to bother to check this one. 
+//generating a random string to use as our ID
+//not going to bother to check this one.
 const generateRandomString = function() {
   const alphabet = "abcdefghijklmnopqrstuvwxyz";
   let randomString = "";
@@ -20,18 +20,18 @@ const userEmailChecker = function(email, database) {
   for (const u in database) {//database is the data object
     const user = database[u];
     if (user.email === email) {
-      return user;
+      return user;//returns user object with email as key-pair value
     }
   }
   return false;
 };
 
-//returns user object
+//returns user object with shortURL as key
 const urlsForUser = function(inputID, database) {
   let match = {};
   for (const u in database) {
     if (database[u].userID === inputID.id) {
-      match[u] = database[u];
+      match[u] = database[u];//assigns database object to match object
       return match;
     }
   }
@@ -42,4 +42,4 @@ module.exports = {
   generateRandomString,
   userEmailChecker,
   urlsForUser
-}; 
+};
