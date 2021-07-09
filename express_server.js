@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 let cookieParser = require('cookie-parser');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 //for bcrypt
 const salt = bcrypt.genSaltSync(10); 
@@ -93,7 +93,7 @@ app.get("/urls", (req, res) => {
     res.render("urls_index", templateVars);
   } else {
     const templateVars = {
-      errorMessage: "THIS ID DOESN'T EXIST IN THE USER DATABASE YOU FIEND",
+      errorMessage: "Error! This means you've logged out and now won't be able to see the content. Log back in or register for the urls",
       user: null,
     };
     res.render("urls_error", templateVars);  
@@ -168,10 +168,12 @@ app.post("/urls", (req, res) => {
 
 //handling data we get from login page --checking if matches w data or not
 app.post("/login", (req, res) => {
-  if (userEmailChecker(req.body.email)) { //checking input email w database emails
-    if (passwordChecker(req.body.password)) { //checking input pswd w database pswds
+  const {password, email} = req.body;
+  if (userEmailChecker(email)) { //checking input email w database emails
+    if (bcrypt.compareSync(password, userEmailChecker(email).password)) { //checking input pswd w database pswds
+      console.log(userEmailChecker(email).id);
       //if matches, get matching ID and make a cookie called user_id
-      res.cookie('user_id', getUserID(req.body.email, req.body.password));
+      res.cookie('user_id', userEmailChecker(email).id);
       res.redirect('/urls');//redirects browser back to homepage
     } else {
       res.status(403).send("Email was correct but password was not");
@@ -260,24 +262,6 @@ const userEmailChecker = function(email) {//check if user email is in user objec
   return false;
 };
 
-const passwordChecker = function(password) {//checks password against data
-  for (const u in users) {
-    if (users[u].password === password) {
-      return true;
-    }
-  }
-  return false;
-};
-
-const getUserID = function(email, password) {//to return checked ID for password & email
-  let existingUserID = "";
-  for (const u in users) {
-    if (users[u].email === email && users[u].password === password) {
-      existingUserID = users[u].id;
-    }
-  }
-  return existingUserID;
-};
 
 const urlsforUser = function(inputID) {
   let match = {};
