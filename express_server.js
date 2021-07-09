@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 let cookieParser = require('cookie-parser');
+let cookieSession = require('cookie-session')
 const bcrypt = require('bcryptjs');
 
 //for bcrypt
@@ -11,6 +12,11 @@ const salt = bcrypt.genSaltSync(10);
 
 //"installed it" in Express so it uses it
 app.use(cookieParser());
+
+app.use(cookieSession({
+  name: 'session',
+  keys: ["topsecretkey1", "topsecretkey2"]
+}));
 
 //tells the Express app to use EJS as its templating engine
 app.set("view engine", "ejs");
@@ -65,7 +71,7 @@ using middleware to check if the user is logged in
 instead of doing an if statement for every single get request
 */
 app.use('/', (req, res, next) => {//app.use works for EVERYTHING (get, post)
-  const userID = req.cookies.user_id; 
+  const userID = req.session.user_id; 
   const whiteList = ['/urls', '/login', '/register', '/logout'];
   // console.log(req.path);
   // console.log(typeof req.path);
@@ -83,12 +89,12 @@ app.use('/', (req, res, next) => {//app.use works for EVERYTHING (get, post)
 
 //if end-point is /urls, returns json string w urls in urlDatabase
 app.get("/urls", (req, res) => {
-  if (users[req.cookies.user_id]) { //check if cookie user.ID exists in user database (should)
-    let loggedIn = urlsforUser(users[req.cookies.user_id]); //loggedIn = checked object that exists
+  if (users[req.session.user_id]) { //check if cookie user.ID exists in user database (should)
+    let loggedIn = urlsforUser(users[req.session.user_id]); //loggedIn = checked object that exists
     // console.log(loggedIn);
     const templateVars = {
       urls: loggedIn,
-      user: users[req.cookies.user_id] && users[req.cookies.user_id].email //check if ID exists then if it does it'll try to get the email    
+      user: users[req.session.user_id] && users[req.session.user_id].email //check if ID exists then if it does it'll try to get the email    
     };
     res.render("urls_index", templateVars);
   } else {
@@ -103,7 +109,7 @@ app.get("/urls", (req, res) => {
 //allows header to be used and cookies to exist from header
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    user: users[req.cookies.user_id] && users[req.cookies.user_id].email //check if ID exists then if it does it'll try to get the email
+    user: users[req.session.user_id] && users[req.session.user_id].email //check if ID exists then if it does it'll try to get the email
   };
   res.render("urls_new", templateVars); 
 });
@@ -111,7 +117,7 @@ app.get("/urls/new", (req, res) => {
 //reponds to login form template
 app.get("/login", (req, res) => {
   const templateVars = {
-    user: req.cookies.user_id,
+    user: req.session.user_id,
     password: req.body.password
   };
   res.render("urls_login", templateVars);
@@ -120,7 +126,7 @@ app.get("/login", (req, res) => {
 //allows header to be used and cookies to exist from header
 app.get("/register", (req, res) => {
   const templateVars = {
-    user: req.cookies.user_id
+    user: req.session.user_id
   };
   res.render("urls_register", templateVars);
 });
@@ -131,7 +137,7 @@ app.get("/urls/:shortURL", (req, res) => {//note :shortURL is a "general" path
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
-    user: urlsforUser(users[req.cookies.user_id]) && users[req.cookies.user_id].email //check if ID exists then if it does it'll try to get the email
+    user: urlsforUser(users[req.session.user_id]) && users[req.session.user_id].email //check if ID exists then if it does it'll try to get the email
   };
   res.render("urls_show", templateVars);
 });
@@ -162,7 +168,7 @@ app.post("/urls", (req, res) => {
   const tempKey = generateRandomString(); //assigning temporary key
   urlDatabase[tempKey] = { // adding OBJECT to database
     longURL: req.body.longURL,
-    userID: req.cookies.user_id};
+    userID: req.session.user_id};
   res.redirect(`/urls/${tempKey}`); //redirecting client to shortUrl
 });
 
@@ -173,7 +179,7 @@ app.post("/login", (req, res) => {
     if (bcrypt.compareSync(password, userEmailChecker(email).password)) { //checking input pswd w database pswds
       console.log(userEmailChecker(email).id);
       //if matches, get matching ID and make a cookie called user_id
-      res.cookie('user_id', userEmailChecker(email).id);
+      res.session.user_id = userEmailChecker(email).id;
       res.redirect('/urls');//redirects browser back to homepage
     } else {
       res.status(403).send("Email was correct but password was not");
@@ -197,7 +203,7 @@ app.post("/register", (req, res) => {
       password: req.body.password
     };
     console.log(users);
-    res.cookie('user_id', newUserID); //creating a cookie w new user's data
+    res.session.user_id = newUserID; //creating a cookie w new user's data
     res.redirect('/urls');//redirect back to homepage
   }
 });
@@ -205,7 +211,7 @@ app.post("/register", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL; //saves url from page
   const url = urlDatabase[shortURL]; //database object 
-  if (url.userID === req.cookies.user_id) { //checks if ID is in database 
+  if (url.userID === req.session.user_id) { //checks if ID is in database 
     url.longURL = req.body.newlongURL; //THE EDITING MAGIC
     res.redirect('/urls');//redirects to homepage
   } else {
@@ -217,7 +223,7 @@ app.post("/urls/:shortURL", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;//takes shortURL from browser assigns to var
   if (urlDatabase[shortURL]) { //compare shortURL to shortURL in database
-    if (urlsforUser(users[req.cookies.user_id])) { //see if user ID from cookie matches one matching shortURL in users database
+    if (urlsforUser(users[req.session.user_id])) { //see if user ID from cookie matches one matching shortURL in users database
       delete urlDatabase[shortURL];//deletes data based on the var
       res.redirect('/urls');//redirects to homepage
     } else {
