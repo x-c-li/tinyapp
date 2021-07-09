@@ -4,9 +4,10 @@ const PORT = 8080; // default port 8080
 let cookieParser = require('cookie-parser');
 let cookieSession = require('cookie-session')
 const bcrypt = require('bcryptjs');
+const { generateRandomString, userEmailChecker, urlsforUser } = require('./helper')
 
 //for bcrypt
-const salt = bcrypt.genSaltSync(10); 
+const salt = bcrypt.genSaltSync(10);
 //use bcrypt to hash via: bcrypt.hashSync(password, salt)
 //bcrypt.compareSync(password you want to check, password you're checking against (in data))
 
@@ -242,46 +243,3 @@ app.post("/logout", (req, res) => {
   req.session.user_id = null;  // NOT SURE THAT THIS IS ACTUALLY GETTING RID OF COOKIES
   res.redirect('/urls');//redirects to homepage
 });
-
-
-//---FUNCTIONS--------------------------------------------------------------------------------------
-
-const generateRandomString = function() {
-  const alphabet = "abcdefghijklmnopqrstuvwxyz";
-  let randomString = "";
-  for (let i = 0; i < 7; i++) {
-    if ((Math.random() * 10) <= 5) {
-      randomString += alphabet[Math.floor(Math.random() * alphabet.length)];
-    } else {
-      randomString += Math.floor(Math.random() * 10);
-    }
-  }
-  return randomString;
-};
-
-const userEmailChecker = function(email, database) {//check if user email is in user object already
-  for (const u in database) {//users is the data object
-    const user = database[u];
-    if (user.email === email) {
-      // console.log(`${email}-----------`, user);
-      return user;
-    }
-  }
-  return false;
-};
-
-
-const urlsforUser = function(inputID, database) {
-  let match = {};
-  for (const u in database) {
-    // console.log("inputID.id", inputID.id)
-    // console.log("userID from database", urlDatabase[u].userID)
-    if (database[u].userID === inputID.id) {
-      // console.log("urldatabase[u]", urlDatabase[u])
-      // console.log("urldatabase", urlDatabase)
-      match[u] = database[u];
-      return match;
-    }
-  }
-  return false;
-};
