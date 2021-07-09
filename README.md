@@ -6,13 +6,10 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ##### Homepage Without Logging In/Regstering
 ![](https://github.com/x-c-li/tinyapp/blob/master/pictures/urls.png)
-
 ##### Login Page
 ![](https://github.com/x-c-li/tinyapp/blob/master/pictures/login-page.png)
-
 ##### Homepage (/urls) After Logging In
 ![](https://github.com/x-c-li/tinyapp/blob/master/pictures/urls-after-logged-in.png)
-
 ##### Creating A Tiny URL
 ![](https://github.com/x-c-li/tinyapp/blob/master/pictures/create-new-url.png)
 
