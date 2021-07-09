@@ -4,7 +4,7 @@ const PORT = 8080; // default port 8080
 let cookieParser = require('cookie-parser');
 let cookieSession = require('cookie-session')
 const bcrypt = require('bcryptjs');
-const { generateRandomString, userEmailChecker, urlsforUser } = require('./helper')
+const { generateRandomString, userEmailChecker, urlsForUser } = require('./helper')
 
 //for bcrypt
 const salt = bcrypt.genSaltSync(10);
@@ -91,7 +91,7 @@ app.use('/', (req, res, next) => {//app.use works for EVERYTHING (get, post)
 //if end-point is /urls, returns json string w urls in urlDatabase
 app.get("/urls", (req, res) => {
   if (users[req.session.user_id]) { //check if cookie user.ID exists in user database (should)
-    let loggedIn = urlsforUser(users[req.session.user_id], urlDatabase); //loggedIn = checked object that exists
+    let loggedIn = urlsForUser(users[req.session.user_id], urlDatabase); //loggedIn = checked object that exists
     // console.log(loggedIn);
     const templateVars = {
       urls: loggedIn,
@@ -138,7 +138,7 @@ app.get("/urls/:shortURL", (req, res) => {//note :shortURL is a "general" path
   const templateVars = { 
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
-    user: urlsforUser(users[req.session.user_id], urlDatabase) && users[req.session.user_id].email //check if ID exists then if it does it'll try to get the email
+    user: urlsForUser(users[req.session.user_id], urlDatabase) && users[req.session.user_id].email //check if ID exists then if it does it'll try to get the email
   };
   res.render("urls_show", templateVars);
 });
@@ -225,7 +225,7 @@ app.post("/urls/:shortURL", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;//takes shortURL from browser assigns to var
   if (urlDatabase[shortURL]) { //compare shortURL to shortURL in database
-    if (urlsforUser(users[req.session.user_id], urlDatabase)) { //see if user ID from cookie matches one matching shortURL in users database
+    if (urlsForUser(users[req.session.user_id], urlDatabase)) { //see if user ID from cookie matches one matching shortURL in users database
       delete urlDatabase[shortURL];//deletes data based on the var
       res.redirect('/urls');//redirects to homepage
     } else {
