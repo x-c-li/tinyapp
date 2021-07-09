@@ -1,6 +1,7 @@
 //---HELPER FUNCTIONS--------------------------------------------------------------------------------------
 
 //generating a random string to use as our ID 
+//not going to bother to check this one. 
 const generateRandomString = function() {
   const alphabet = "abcdefghijklmnopqrstuvwxyz";
   let randomString = "";
@@ -16,7 +17,7 @@ const generateRandomString = function() {
 
 //check if user email is in user object already
 const userEmailChecker = function(email, database) {
-  for (const u in database) {//users is the data object
+  for (const u in database) {//database is the data object
     const user = database[u];
     if (user.email === email) {
       return user;
@@ -41,4 +42,4 @@ module.exports = {
   generateRandomString,
   userEmailChecker,
   urlsForUser
-};
+}; 
