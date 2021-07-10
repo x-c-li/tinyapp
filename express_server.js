@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
-let cookieParser = require('cookie-parser');
 let cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const { generateRandomString, userEmailChecker, urlsForUser } = require('./helper');
@@ -12,8 +11,6 @@ const salt = bcrypt.genSaltSync(10);
 //bcrypt.compareSync(password you want to check, password you're checking against (in data))
 
 //"installed it" in Express so it uses it
-app.use(cookieParser());
-
 app.use(cookieSession({
   name: 'session',
   keys: ["topsecretkey1", "topsecretkey2"]
@@ -30,42 +27,21 @@ app.use(bodyParser.urlencoded({extended: true}));
 //--DATA OBJECTS---------------------------------------------------------------------
 
 //object with urls in it
-const urlDatabase = {
-  "b2xVn2": {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: "userRandomID"
-  },
-  "9sm5xK": {
-    longURL: "http://www.google.com",
-    userID: "user2RandomID"
-  }
-};
+const urlDatabase = {};
 
-const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: bcrypt.hashSync("1234", salt)
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: bcrypt.hashSync("12345", salt)
-  }
-};
+const users = {};
+
 //---ROUTES------------------------------------------------------------------------
-
-//---LISTEN--------------------------------------------------------------------------------------
-//tells us when we have a connection to local server
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
 
 //--GET------------------------------------------------------------------------------
 
-//returns hello on page if end-point is "/"
+//ASK FOR HELP
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  if(!req.session.user_id) {
+    res.redirect("/login")
+  } else {
+    res.redirect('/urls');
+  }
 });
 
 /*
@@ -150,7 +126,7 @@ app.get("/u/:shortURL", (req, res) => {
   if (longURL) {
     res.redirect(301, longURL.longURL);
   } else {
-    res.render("Error 403: The short URL doesn't exist");
+    res.status(403).send("Error 403: The short URL doesn't exist");
   }
 });
 
@@ -217,7 +193,7 @@ app.post("/urls/:shortURL", (req, res) => {
     url.longURL = req.body.newlongURL; //editing the longURL w newlongURL input from ejs file
     res.redirect('/urls');//redirects to homepage
   } else {
-    res.send("ERROR: The user ID doesn't match... sus..");
+    res.status(403).send("Error 403: The user ID doesn't match... sus..");
   }
 });
 
@@ -241,4 +217,11 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/logout", (req, res) => {
   req.session.user_id = null; //clears user_id cookie
   res.redirect('/urls');//redirects to homepage
+});
+
+
+//---LISTEN--------------------------------------------------------------------------------------
+//tells us when we have a connection to local server
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
